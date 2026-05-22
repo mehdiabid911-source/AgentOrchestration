@@ -10,6 +10,14 @@ class TestConfig:
         assert config.get("app.name") == "test"
         assert config.get("app.port") == 8080
 
+    @pytest.mark.parametrize("config_contents", ['["not", "an", "object"]', '"not an object"', "42"])
+    def test_load_requires_object_root(self, tmp_path, config_contents):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(config_contents)
+
+        with pytest.raises(ValueError, match="Config root must be a JSON object"):
+            Config(str(config_file))
+
     def test_default_value(self):
         config = Config()
         assert config.get("nonexistent.key", "default") == "default"
